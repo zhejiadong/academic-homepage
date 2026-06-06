@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research | Zhejia Dong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body data-page="research">
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-brand" href="index.html" data-brand-name>Zhejia Dong</a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html" data-nav="home">Home</a>
+        <a href="research.html" data-nav="research">Research</a>
+        <a href="presentations.html" data-nav="presentations">Presentations</a>
+        <a href="teaching.html" data-nav="teaching">Teaching</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" aria-label="Profile sidebar">
+      <div class="profile-card compact">
+        <img class="profile-card__photo" src="assets/images/avatar-placeholder.svg" alt="Profile placeholder" data-profile-photo />
+        <h1 class="profile-card__name" data-profile-name>Zhejia Dong</h1>
+        <p class="profile-card__title" data-profile-title>Assistant Professor / Researcher</p>
+        <ul class="profile-card__links" data-profile-links></ul>
+      </div>
+    </aside>
+
+    <article class="content-column">
+      <section class="content-panel">
+        <h2 class="content-panel__title">Research</h2>
+        <div class="rich-text" data-research-overview></div>
+      </section>
+
+      <section class="content-panel">
+        <h3 class="content-panel__subtitle">Selected Publications</h3>
+        <div class="card-list" data-publication-list></div>
+      </section>
+
+      <section class="content-panel">
+        <h3 class="content-panel__subtitle">Working Papers and Projects</h3>
+        <div class="card-list" data-project-list></div>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p data-site-footer></p>
+  </footer>
+
+  <script src="assets/site-data.js"></script>
+  <script src="assets/site.js"></script>
+</body>
+</html>
