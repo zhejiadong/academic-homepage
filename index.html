@@ -8,7 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css" />
+  <script>
+    document.write('<link rel="stylesheet" href="assets/style.css?v=' + Date.now() + '">');
+  </script>
 </head>
 <body data-page="home">
   <header class="site-header">
@@ -26,7 +28,7 @@
   <main class="layout">
     <aside class="sidebar" aria-label="Profile sidebar">
       <div class="profile-card">
-        <img class="profile-card__photo" src="assets/images/avatar-placeholder.svg" alt="Profile placeholder" data-profile-photo />
+        <img class="profile-card__photo" src="assets/images/profile.jpg" alt="Zhejia Dong photo" data-profile-photo />
         <h1 class="profile-card__name" data-profile-name>Zhejia Dong</h1>
         <p class="profile-card__title" data-profile-title>Assistant Professor / Researcher</p>
         <ul class="profile-card__links" data-profile-links></ul>
@@ -40,7 +42,12 @@
       </section>
 
       <section class="content-panel">
-        <h2 class="content-panel__title">Recent News and Upcoming Events</h2>
+        <h2 class="content-panel__title">Education</h2>
+        <div class="card-list" data-education-list></div>
+      </section>
+
+      <section class="content-panel">
+        <h2 class="content-panel__title">Recent News and Updates</h2>
         <div class="news-list" data-news-list></div>
       </section>
 
@@ -55,7 +62,11 @@
     <p data-site-footer></p>
   </footer>
 
-  <script src="assets/site-data.js"></script>
-  <script src="assets/site.js"></script>
+  <script>
+    const assetVersion = Date.now();
+    document.write('<script src="assets/site-data.js?v=' + assetVersion + '"><\/script>');
+    document.write('<script src="assets/home-data.js?v=' + assetVersion + '"><\/script>');
+    document.write('<script src="assets/site.js?v=' + assetVersion + '"><\/script>');
+  </script>
 </body>
 </html>

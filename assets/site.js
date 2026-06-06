@@ -1,5 +1,11 @@
 (function () {
-  const data = window.SITE_DATA || {};
+  const data = {
+    ...(window.SITE_DATA || {}),
+    home: window.HOME_DATA || window.SITE_DATA?.home || {},
+    research: window.RESEARCH_DATA || window.SITE_DATA?.research || {},
+    presentations: window.PRESENTATIONS_DATA || window.SITE_DATA?.presentations || {},
+    teaching: window.TEACHING_DATA || window.SITE_DATA?.teaching || {}
+  };
   const profile = data.profile || {};
   const site = data.site || {};
   const page = document.body.dataset.page;
@@ -23,11 +29,45 @@
 
   function parseInlineMarkdown(text) {
     let html = escapeHtml(text);
-    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    const tokens = [];
+    const stash = replacement => {
+      const token = `HERMESTOKEN${tokens.length}X`;
+      tokens.push(replacement);
+      return token;
+    };
+
+    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => stash(`<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`));
+    html = html.replace(/\[([^\]]+)\]\((mailto:[^\s)]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\)/g, (_, label, email) => stash(`<a href="${email.startsWith('mailto:') ? email : `mailto:${email}`}">${label}</a>`));
+    html = html.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, (_, url) => stash(`<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`));
+    html = html.replace(/(^|[\s(])((https?:\/\/[^\s<]+))/g, (_, prefix, url) => `${prefix}${stash(`<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`)}`);
+    html = html.replace(/(^|[\s(])([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, (_, prefix, email) => `${prefix}${stash(`<a href="mailto:${email}">${email}</a>`)}`);
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    return html;
+
+    return tokens.reduce((result, replacement, index) => result.replace(`HERMESTOKEN${index}X`, replacement), html);
+  }
+
+  function parseInlineCitation(text) {
+    let html = escapeHtml(text);
+    const tokens = [];
+    const stash = replacement => {
+      const token = `HERMESCITE${tokens.length}X`;
+      tokens.push(replacement);
+      return token;
+    };
+
+    html = html.replace(/\\\s*/g, '<br>');
+    html = html.replace(/(Dong,\s*Zhejia|Dong,\s*Z\.)/g, '<strong>$1</strong>');
+    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => stash(`<a href="${url}" target="_blank" rel="noopener noreferrer">[${label}]</a>`));
+    html = html.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, (_, url) => stash(`<a href="${url}" target="_blank" rel="noopener noreferrer">[${url}]</a>`));
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    return tokens.reduce((result, replacement, index) => result.replace(`HERMESCITE${index}X`, replacement), html);
   }
 
   function renderParagraphs(selector, paragraphs) {
@@ -160,35 +200,81 @@
   function renderCardList(selector, items) {
     const target = qs(selector);
     if (!target || !Array.isArray(items)) return;
-    target.innerHTML = items.map(item => `
-      <div class="info-card">
-        ${item.meta ? `<div class="info-card__meta">${item.meta}</div>` : ''}
-        <h4 class="info-card__title">${item.title || ''}</h4>
-        ${item.body ? `<p class="info-card__body">${item.body}</p>` : ''}
-        ${item.award ? `<p class="info-card__award">Award: ${item.award}</p>` : ''}
-        ${item.note ? `<p class="info-card__note">${item.note}</p>` : ''}
-        ${renderPills(item.tags)}
-        ${renderActionLinks(item.links)}
-      </div>
-    `).join('');
+    target.classList.add('numbered-list');
+    target.innerHTML = items.map(item => {
+      if (typeof item === 'string') {
+        return `
+          <div class="info-card info-card--simple">
+            <p class="info-card__plain">${parseInlineCitation(item)}</p>
+          </div>
+        `;
+      }
+      const linkedTitle = item.href
+        ? `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title || '')}</a>`
+        : parseInlineMarkdown(item.title || '');
+      return `
+        <div class="info-card">
+          ${item.meta ? `<div class="info-card__meta">${parseInlineMarkdown(item.meta)}</div>` : ''}
+          <h4 class="info-card__title">${linkedTitle}</h4>
+          ${item.body ? `<p class="info-card__body">${parseInlineMarkdown(item.body)}</p>` : ''}
+          ${item.award ? `<p class="info-card__award">Award: ${parseInlineMarkdown(item.award)}</p>` : ''}
+          ${item.note ? `<p class="info-card__note">${parseInlineMarkdown(item.note)}</p>` : ''}
+          ${renderPills(item.tags)}
+          ${renderActionLinks(item.links)}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderEducationList(selector, items) {
+    const target = qs(selector);
+    if (!target || !Array.isArray(items)) return;
+    const listItems = items.map(item => {
+      if (typeof item === 'string') {
+        return `<li>${parseInlineMarkdown(item)}</li>`;
+      }
+      const parts = [item.degree, item.institution, item.years, item.details].filter(Boolean);
+      return `<li>${parseInlineMarkdown(parts.join(', '))}</li>`;
+    }).join('');
+    target.innerHTML = `<ul class="simple-list">${listItems}</ul>`;
+  }
+
+  function renderLineList(selector, items) {
+    const target = qs(selector);
+    if (!target || !Array.isArray(items)) return;
+    target.innerHTML = `<div class="simple-lines">${items.map(item => {
+      if (typeof item === 'string') {
+        return `<p class="simple-lines__item">${parseInlineMarkdown(item)}</p>`;
+      }
+      const parts = [item.title, item.body, item.note].filter(Boolean);
+      return `<p class="simple-lines__item">${parseInlineMarkdown(parts.join(' '))}</p>`;
+    }).join('')}</div>`;
   }
 
   function renderNewsList(selector, items) {
     const target = qs(selector);
     if (!target || !Array.isArray(items)) return;
     target.innerHTML = items.map(item => {
+      if (typeof item === 'string') {
+        return `
+          <div class="news-item">
+            <p class="news-item__lead">${parseInlineMarkdown(item)}</p>
+          </div>
+        `;
+      }
       const details = Array.isArray(item.details) && item.details.length
-        ? `<ul class="news-item__details">${item.details.map(detail => `<li>${detail}</li>`).join('')}</ul>`
+        ? `<ul class="news-item__details">${item.details.map(detail => `<li>${parseInlineMarkdown(detail)}</li>`).join('')}</ul>`
         : '';
       const linkedTitle = item.href
-        ? `<a href="${item.href}">${item.title || ''}</a>`
-        : (item.title || '');
-      const label = item.label ? `<span class="news-item__label">[${item.label}]</span> ` : '';
+        ? `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title || '')}</a>`
+        : parseInlineMarkdown(item.title || '');
+      const label = item.label ? `<span class="news-item__label">[${escapeHtml(item.label)}]</span> ` : '';
       const title = item.title ? `${linkedTitle} ` : '';
-      const body = item.body || '';
+      const body = parseInlineMarkdown(item.body || '');
+      const date = item.date ? `<span class="news-item__date">${escapeHtml(item.date)}.</span> ` : '';
       return `
         <div class="news-item">
-          <p class="news-item__lead"><span class="news-item__date">${item.date || ''}.</span> ${label}${title}${body}</p>
+          <p class="news-item__lead">${date}${label}${title}${body}</p>
           ${details}
         </div>
       `;
@@ -202,23 +288,44 @@
 
   function renderActionLinks(links) {
     if (!Array.isArray(links) || !links.length) return '';
-    return `<div class="link-row">${links.map(link => `<a href="${link.href}">${link.label}</a>`).join('')}</div>`;
+    return `<div class="link-row">${links.map(link => {
+      const rawLabel = String(link.label || '').trim();
+      const label = /^\[.*\]$/.test(rawLabel) ? rawLabel : `[${escapeHtml(rawLabel)}]`;
+      return `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    }).join('')}</div>`;
   }
 
   function renderPresentationList(selector, items) {
     const target = qs(selector);
     if (!target || !Array.isArray(items)) return;
+    target.classList.add('numbered-list');
     let currentYear = null;
     target.innerHTML = items.map(item => {
+      if (typeof item === 'string') {
+        return `
+          <div class="presentation-item presentation-item--simple">
+            <p class="presentation-title">${parseInlineMarkdown(item)}</p>
+          </div>
+        `;
+      }
       const yearHeader = item.year !== currentYear ? `<h3 class="presentation-year">[${item.year}]</h3>` : '';
       currentYear = item.year;
+      const title = item.href
+        ? `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title || '')}</a>`
+        : parseInlineMarkdown(item.title || '');
+      const lineParts = [
+        item.month ? `<span class="presentation-month">${escapeHtml(item.month)}</span>` : '',
+        item.label ? `<span class="presentation-tag">[${escapeHtml(item.label)}]</span>` : '',
+        item.location ? `${escapeHtml(item.location)}.` : ''
+      ].filter(Boolean);
+      const headingLine = [...lineParts, title].filter(Boolean).join(' ');
       return `
         ${yearHeader}
         <div class="presentation-item">
-          <p class="presentation-line"><span class="presentation-month">${item.month}</span> <span class="presentation-tag">[${item.label}]</span> ${item.location}.</p>
-          <p class="presentation-title">${item.title}</p>
-          ${item.award ? `<p class="presentation-award">Award: ${item.award}</p>` : ''}
-          ${item.note ? `<p class="presentation-note">${item.note}</p>` : ''}
+          ${headingLine ? `<p class="presentation-line">${headingLine}</p>` : ''}
+          ${item.body ? `<p class="presentation-body">${parseInlineMarkdown(item.body)}</p>` : ''}
+          ${item.award ? `<p class="presentation-award">Award: ${parseInlineMarkdown(item.award)}</p>` : ''}
+          ${item.note ? `<p class="presentation-note">${parseInlineMarkdown(item.note)}</p>` : ''}
           ${renderActionLinks(item.links)}
         </div>
       `;
@@ -257,6 +364,7 @@
   async function renderPage() {
     if (page === 'home') {
       await renderMarkdownFile('[data-home-intro]', data.home?.introMarkdownPath, data.home?.intro || []);
+      renderEducationList('[data-education-list]', data.home?.education || []);
       renderNewsList('[data-news-list]', data.home?.news || []);
       renderNewsList('[data-awards-list]', data.home?.awards || []);
     }
@@ -271,7 +379,7 @@
     }
     if (page === 'teaching') {
       await renderMarkdownFile('[data-teaching-overview]', data.teaching?.overviewMarkdownPath, data.teaching?.overview || []);
-      renderCardList('[data-course-list]', data.teaching?.courses || []);
+      renderLineList('[data-course-list]', data.teaching?.courses || []);
     }
   }
 
