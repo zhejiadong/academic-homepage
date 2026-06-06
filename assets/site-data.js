@@ -1,4 +1,3 @@
-
 window.SITE_DATA = {
   site: {
     footerOwner: 'Zhejia Dong',
@@ -26,11 +25,7 @@ window.SITE_DATA = {
   },
 
   home: {
-    intro: [
-      'Hi, I am Zhejia Dong, a current 3rd-year PhD candidate in the <a href="https://biostatistics.sph.brown.edu/" target="_blank" rel="noopener noreferrer">Department of Biostatistics</a> at <a href="https://www.brown.edu/" target="_blank" rel="noopener noreferrer">Brown University</a>.',
-      'I am a PhD candidate in the Department of Biostatistics at Brown University. My research focuces on developing statistical and causal inference methods to address challenges in analyzing complex data, with a focus on publich health and social science. This includes desingning matching methods and randomization inference methods for valid causal inference with observatinal network data. His currently work also includes intergrating machine learning methods with causal inference framwork for EHR data analysis. ',
-      'My advisor is Dr. Youjin Lee. My dissertaion committee also includes Drs. Corwin Ziger, Jon Steingrimsson, and  Rachel Baker. I also work closely with Dr. Ashley Buchanan from University of Rhode Island.'
-    ],
+    introMarkdownPath: 'content/home.md',
     news: [
       {
         date: 'Aug 2026',
@@ -63,10 +58,7 @@ window.SITE_DATA = {
   },
 
   research: {
-    overview: [
-      'Use this page to describe your research program in a more structured way than the homepage. Summarize key themes, methods, and applications.',
-      'You can organize content into selected publications, ongoing projects, software, datasets, or collaborations.'
-    ],
+    overviewMarkdownPath: 'content/research.md',
     publications: [
       {
         title: 'Publication title goes here',
@@ -96,10 +88,7 @@ window.SITE_DATA = {
   },
 
   presentations: {
-    overview: [
-      'This page lists invited talks, conference presentations, and poster presentations.',
-      'Entries are ordered from newest to oldest. When a specific presentation receives an award, the award is listed directly with that entry.'
-    ],
+    overviewMarkdownPath: 'content/presentations.md',
     talks: [
       {
         year: '2026',
@@ -138,10 +127,7 @@ window.SITE_DATA = {
   },
 
   teaching: {
-    overview: [
-      'My teaching experience to date has been as a graduate teaching assistant at Brown University. I have not yet served as the primary instructor for my own course.',
-      'My TA responsibilities have included holding office hours, grading homework and exams, and supporting graduate students in statistics and biostatistics courses.'
-    ],
+    overviewMarkdownPath: 'content/teaching.md',
     courses: [
       {
         title: 'PHP 2550: Practical Data Analysis',

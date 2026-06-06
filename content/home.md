@@ -1,0 +1,5 @@
+Hi, I am Zhejia Dong, a current 3rd-year PhD candidate in the [Department of Biostatistics](https://biostatistics.sph.brown.edu/) at [Brown University](https://www.brown.edu/).
+
+I am a PhD candidate in the Department of Biostatistics at Brown University. My research focuces on developing statistical and causal inference methods to address challenges in analyzing complex data, with a focus on publich health and social science. This includes desingning matching methods and randomization inference methods for valid causal inference with observatinal network data. His currently work also includes intergrating machine learning methods with causal inference framwork for EHR data analysis.
+
+My advisor is Dr. Youjin Lee. My dissertaion committee also includes Drs. Corwin Ziger, Jon Steingrimsson, and Rachel Baker. I also work closely with Dr. Ashley Buchanan from University of Rhode Island.
